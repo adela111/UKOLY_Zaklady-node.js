@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TODO detail</title>
+  </head>
+  <body>
+    <h1><%= todo.title %>!</h1>
+
+    <p>
+        Stav:
+        <% if (todo.done){ %>
+            Hotovo
+        <%} else {%>
+            Nehotove
+        <%} %>
+    </p>
+    <p>
+        <% if (todo.done) { %>
+          <a href="/toggle-todo/<%= todo.id %>">oznacit ako nehotove</a>
+          <p><a href="/remove-todo/<%= todo.id %>">odstranit</a></p>
+        <% } else { %>
+          <a href="/toggle-todo/<%= todo.id %>">oznacit ako hotove</a>
+          <p><a href="/remove-todo/<%= todo.id %>">odstranit</a></p>
+        <% } %>
+    </p>
+    <form method="post" action="/edit-todo/<%= todo.id %>">
+      <input name="title" value = '<%= todo.title %>'/>
+      <button type="submit">Zmenit nazov</button>
+    </form>
+    <br/>
+    <a href="/">Spat</a>
+  </body>
+</html>

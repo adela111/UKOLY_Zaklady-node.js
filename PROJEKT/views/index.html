@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1><%= name %>!</h1>
+    <ul>
+      <% for (const todo of todos) { %>
+      <li>
+        <a href="/todo/<%= todo.id %>">
+          <%= todo.title %>
+        </a>
+        
+        <% if (todo.done) { %>
+          <a href="/toggle-todo/<%= todo.id %>">oznacit ako nehotove</a>
+          <a href="/remove-todo/<%= todo.id %>">odstranit</a>
+        <% } else { %>
+          <a href="/toggle-todo/<%= todo.id %>">oznacit ako hotove</a>
+          <a href="/remove-todo/<%= todo.id %>">odstranit</a>
+        <% } %>
+      </li>
+      <% } %>
+    </ul>
+
+    <form method="post" action="/add-todo">
+      <input name="title" />
+      <button type="submit">Pridat todo</button>
+    </form>
+  </body>
+</html>
