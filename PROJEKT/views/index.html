@@ -11,7 +11,7 @@
       <% for (const todo of todos) { %>
       <li>
         <a href="/todo/<%= todo.id %>">
-          <%= todo.title %>
+          <%= todo.title %> (<%= todo.priority%>)
         </a>
         
         <% if (todo.done) { %>

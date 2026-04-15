@@ -1,26 +1,16 @@
 import { Hono } from 'hono'
 import { serve } from '@hono/node-server'
 import ejs from 'ejs'
+import { drizzle } from "drizzle-orm/libsql"
+import { todosTable } from './src/schema.js'
+import {eq} from "drizzle-orm"
+
+const db = drizzle({
+  connection: "file:db.sqlite",
+  logger: true,
+})
 
 const app = new Hono()
-
-let todos = [
-  {
-    id: 1,
-    title: 'Dokoncit ukol z node.js',
-    done: true,
-  },
-  {
-    id: 2,
-    title: 'Ist do prace',
-    done: false,
-  },
-  {
-    id: 3,
-    title: 'Ist do skoly',
-    done: false,
-  },
-]
 
 app.get(async (c, next) => {
   console.log(c.req.method, c.req.url)
@@ -28,6 +18,7 @@ app.get(async (c, next) => {
 })
 
 app.get('/', async (c) => {
+  const todos = await db.select().from(todosTable).all()
   const html = await ejs.renderFile('views/index.html', {
     name: 'Todos',
     todos,
@@ -39,13 +30,11 @@ app.get('/', async (c) => {
 app.post('/add-todo', async (c) => {
   const body = await c.req.formData()
   const title = body.get('title')
-  const newId= todos.length>0? Math.max(...todos.map((t) => t.id)) + 1
-      : 1
 
-  todos.push({
-    id: newId,
+  await db.insert(todosTable).values({
     title,
     done: false,
+    priority: 'normal',
   })
 
   return c.redirect('/')
@@ -54,23 +43,30 @@ app.post('/add-todo', async (c) => {
 app.get('/remove-todo/:id', async (c) => {
   const id = Number(c.req.param('id'))
 
-  todos = todos.filter((todo) => todo.id !== id)
+  await db.delete(todosTable).where(eq(todosTable.id,id))
 
   return c.redirect('/')
 })
 
 app.get('/toggle-todo/:id', async (c) => {
   const id = Number(c.req.param('id'))
+  const todo = await db
+    .select()
+    .from(todosTable)
+    .where(eq(todosTable.id,id))
+    .get()
+  if (!todo) return c.notFound()
 
-  const todo = todos.find((todo) => todo.id === id)
-  todo.done =!todo.done
+  await db.update(todosTable)
+  .set({done: !todo.done})
+  .where(eq(todosTable.id,id))
 
   return c.redirect('/')
 })
 
 app.get('/todo/:id', async (c) => {
   const id = Number(c.req.param('id'))
-  const todo= todos.find((todo)=> todo.id===id)
+  const todo = await db.select().from(todosTable).where(eq(todosTable.id,id)).get()
 
   if (!todo) {
     return c.text('Take todo nie je',404)
@@ -85,13 +81,21 @@ app.get('/todo/:id', async (c) => {
 
 app.post('/edit-todo/:id', async (c) => {
   const id = Number(c.req.param('id'))
+
+  const todo = await db
+    .select()
+    .from(todosTable)
+    .where(eq(todosTable.id,id))
+    .get()
+
+  if (!todo) return c.notFound()
+
   const body= await c.req.formData()
   const title = body.get('title')
-  const todo= todos.find((todo)=> todo.id===id)
-
-  if (todo) {
-    todo.title = title
-  }
+  const priority = body.get('priority')
+  await db.update(todosTable)
+    .set({title, priority})
+    .where(eq(todosTable.id, id))
 
   return c.redirect(`/todo/${id}`)
  })

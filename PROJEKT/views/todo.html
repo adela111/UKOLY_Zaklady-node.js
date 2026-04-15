@@ -16,6 +16,10 @@
             Nehotove
         <%} %>
     </p>
+
+    <p>
+      Priority: <%=todo.priority%>
+    </p>
     <p>
         <% if (todo.done) { %>
           <a href="/toggle-todo/<%= todo.id %>">oznacit ako nehotove</a>
@@ -27,7 +31,13 @@
     </p>
     <form method="post" action="/edit-todo/<%= todo.id %>">
       <input name="title" value = '<%= todo.title %>'/>
-      <button type="submit">Zmenit nazov</button>
+      <select name = "priority">
+        <option value="low" <%= todo.priority === 'low'?'selected':''%>>low</option>
+        <option value="normal" <%= todo.priority === 'normal'?'selected':''%>>normal</option>
+        <option value="high" <%= todo.priority === 'high'?'selected':''%>>high</option>
+
+      </select>
+      <button type="submit">Zmenit</button>
     </form>
     <br/>
     <a href="/">Spat</a>
