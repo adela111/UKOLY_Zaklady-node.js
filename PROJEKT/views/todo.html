@@ -6,40 +6,23 @@
     <title>TODO detail</title>
   </head>
   <body>
-    <h1><%= todo.title %>!</h1>
+  <div id="detail">
+    <%- include('_todoDetail.html') %>
+  </div>
+    <script>
+      const ws = new WebSocket('ws://localhost:3000/ws')
+      const todoId = <%= todo.id %>
+      ws.addEventListener('message',(message)=>{
+        const data = JSON.parse(message.data)
 
-    <p>
-        Stav:
-        <% if (todo.done){ %>
-            Hotovo
-        <%} else {%>
-            Nehotove
-        <%} %>
-    </p>
+        if (data.type==='todo-detail' && data.id === todoId){
+          document.getElementById('detail').innerHTML = data.html
+        }
 
-    <p>
-      Priority: <%=todo.priority%>
-    </p>
-    <p>
-        <% if (todo.done) { %>
-          <a href="/toggle-todo/<%= todo.id %>">oznacit ako nehotove</a>
-          <p><a href="/remove-todo/<%= todo.id %>">odstranit</a></p>
-        <% } else { %>
-          <a href="/toggle-todo/<%= todo.id %>">oznacit ako hotove</a>
-          <p><a href="/remove-todo/<%= todo.id %>">odstranit</a></p>
-        <% } %>
-    </p>
-    <form method="post" action="/edit-todo/<%= todo.id %>">
-      <input name="title" value = '<%= todo.title %>'/>
-      <select name = "priority">
-        <option value="low" <%= todo.priority === 'low'?'selected':''%>>low</option>
-        <option value="normal" <%= todo.priority === 'normal'?'selected':''%>>normal</option>
-        <option value="high" <%= todo.priority === 'high'?'selected':''%>>high</option>
-
-      </select>
-      <button type="submit">Zmenit</button>
-    </form>
-    <br/>
-    <a href="/">Spat</a>
+        if (data.type==='todo-deleted' && data.id === todoId){
+          document.getElementById('detail').innerHTML = `<h1> Toto todocko bolo zmazane!!! </h1><a href ="/">Spat</a>`
+        }
+      })
+    </script>
   </body>
 </html>

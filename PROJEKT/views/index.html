@@ -7,27 +7,25 @@
   </head>
   <body>
     <h1><%= name %>!</h1>
-    <ul>
-      <% for (const todo of todos) { %>
-      <li>
-        <a href="/todo/<%= todo.id %>">
-          <%= todo.title %> (<%= todo.priority%>)
-        </a>
-        
-        <% if (todo.done) { %>
-          <a href="/toggle-todo/<%= todo.id %>">oznacit ako nehotove</a>
-          <a href="/remove-todo/<%= todo.id %>">odstranit</a>
-        <% } else { %>
-          <a href="/toggle-todo/<%= todo.id %>">oznacit ako hotove</a>
-          <a href="/remove-todo/<%= todo.id %>">odstranit</a>
-        <% } %>
-      </li>
-      <% } %>
-    </ul>
+
+  <div id="todos">
+    <%- include('_todos.html') %>
+  </div>
 
     <form method="post" action="/add-todo">
       <input name="title" />
       <button type="submit">Pridat todo</button>
     </form>
+    
+    <script>
+      const ws = new WebSocket('ws://localhost:3000/ws')
+
+      ws.addEventListener('message',(message)=>{
+        const data = JSON.parse(message.data)
+        if (data.type==='todos'){
+          document.getElementById('todos').innerHTML = data.html
+        }
+      })
+    </script>
   </body>
 </html>
